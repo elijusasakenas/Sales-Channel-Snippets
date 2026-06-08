@@ -43,7 +43,8 @@ Component.register('sales-channel-snippet-list', {
 
     created() {
         this.repository = this.repositoryFactory.create('sales_channel_snippet');
-        this.httpClient = Shopware.Application.getContainer('init').httpClient;
+        this.languageRepository = this.repositoryFactory.create('language');
+        this.snippetRepository = this.repositoryFactory.create('snippet');
     },
 
     methods: {
@@ -160,17 +161,8 @@ Component.register('sales-channel-snippet-list', {
             this.hasSnippetSearchRun = true;
 
             try {
-                const response = await this.httpClient.get(
-                    '/_action/sales-channel-snippets/snippet-search',
-                    {
-                        params: {
-                            term: this.snippetSearchTerm.trim(),
-                            languageId: this.filters.languageId,
-                        },
-                    }
-                );
-
-                this.snippetSearchResults = response.data.data || [];
+                const localeCode = await this.getSelectedLocaleCode();
+                this.snippetSearchResults = await this.searchSnippetRepository(localeCode);
             } catch (error) {
                 this.snippetSearchResults = [];
                 this.hasSnippetSearchRun = false;
@@ -180,6 +172,43 @@ Component.register('sales-channel-snippet-list', {
             } finally {
                 this.isSnippetSearchLoading = false;
             }
+        },
+
+        async getSelectedLocaleCode() {
+            const criteria = new Criteria(1, 1);
+            criteria.addAssociation('locale');
+
+            const language = await this.languageRepository.get(
+                this.filters.languageId,
+                Context.api,
+                criteria,
+            );
+
+            return language.locale.code;
+        },
+
+        async searchSnippetRepository(localeCode) {
+            const criteria = new Criteria(1, 25);
+            const term = this.snippetSearchTerm.trim();
+
+            criteria.addAssociation('snippetSet');
+            criteria.addFilter(Criteria.equals('snippetSet.iso', localeCode));
+            criteria.addFilter(Criteria.multi('OR', [
+                Criteria.contains('translationKey', term),
+                Criteria.contains('value', term),
+            ]));
+            criteria.addSorting(Criteria.sort('translationKey', 'ASC'));
+
+            const result = await this.snippetRepository.search(criteria, Context.api);
+
+            return result.map((snippet) => {
+                return {
+                    translationKey: snippet.translationKey,
+                    value: snippet.value,
+                    snippetSetName: snippet.snippetSet ? snippet.snippetSet.name : '',
+                    locale: snippet.snippetSet ? snippet.snippetSet.iso : localeCode,
+                };
+            });
         },
 
         useExistingSnippet(result) {

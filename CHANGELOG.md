@@ -4,6 +4,13 @@ All notable changes to Sales Channel Snippets will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.1.5] - 2026-06-08
+
+### Fixed
+
+- Removed the custom snippet search controller to avoid plugin autoload issues in Shopware installs.
+- Switched existing snippet search to Shopware Administration repositories.
+
 ## [0.1.4] - 2026-06-08
 
 ### Added
