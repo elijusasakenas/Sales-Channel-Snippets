@@ -4,6 +4,13 @@ All notable changes to Sales Channel Snippets will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.1.6] - 2026-06-08
+
+### Changed
+
+- Moved existing snippet search into the Snippet key input.
+- Replaced the manual search button with debounced live search while typing.
+
 ## [0.1.5] - 2026-06-08
 
 ### Fixed

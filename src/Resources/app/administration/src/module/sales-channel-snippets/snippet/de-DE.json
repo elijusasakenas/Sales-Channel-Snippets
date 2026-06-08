@@ -7,9 +7,7 @@
     "actions": {
       "add": "Snippet hinzufügen",
       "remove": "Entfernen",
-      "save": "Speichern",
-      "search": "Suchen",
-      "use": "Verwenden"
+      "save": "Speichern"
     },
     "cards": {
       "assignment": "Zuordnung",
@@ -21,20 +19,19 @@
       "noSnippetsTitle": "Keine Snippet-Overrides",
       "noSnippetsSubline": "Klicke auf Snippet hinzufügen, um den ersten Schlüssel und Wert für diese Zuordnung anzulegen.",
       "loadErrorTitle": "Snippet-Overrides konnten nicht geladen werden",
-      "loadErrorSubline": "Bitte Administration neu bauen, Cache leeren und erneut versuchen.",
-      "noSearchResultsTitle": "Keine passenden Snippets",
-      "noSearchResultsSubline": "Versuche einen anderen Snippet-Schlüssel oder einen Teil des aktuellen Werts."
+      "loadErrorSubline": "Bitte Administration neu bauen, Cache leeren und erneut versuchen."
     },
     "fields": {
       "key": "Snippet-Schlüssel",
       "language": "Sprache",
-      "searchExisting": "Vorhandene Snippets suchen",
       "salesChannel": "Sales Channel",
       "value": "Eigener Wert"
     },
     "placeholders": {
-      "key": "checkout.confirmSubmit",
-      "searchExisting": "Nach Schlüssel oder aktuellem Wert suchen"
+      "key": "checkout.confirmSubmit"
+    },
+    "search": {
+      "loading": "Suche..."
     },
     "notifications": {
       "loadError": "Sales-Channel-Snippet-Overrides konnten nicht geladen werden.",

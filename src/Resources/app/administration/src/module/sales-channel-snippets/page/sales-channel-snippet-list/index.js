@@ -28,10 +28,10 @@ Component.register('sales-channel-snippet-list', {
             isLoading: false,
             processSuccess: false,
             loadError: false,
-            snippetSearchTerm: '',
-            snippetSearchResults: [],
-            isSnippetSearchLoading: false,
-            hasSnippetSearchRun: false,
+            snippetSearchResults: {},
+            snippetSearchLoading: {},
+            snippetSearchTimers: {},
+            selectedLocaleCode: null,
         };
     },
 
@@ -68,6 +68,7 @@ Component.register('sales-channel-snippet-list', {
             try {
                 this.snippets = await this.repository.search(criteria, Context.api);
                 this.persistedSnippetIds = this.snippets.map((snippet) => snippet.id);
+                this.clearSnippetSearchState();
             } catch (error) {
                 this.snippets = [];
                 this.persistedSnippetIds = [];
@@ -83,8 +84,8 @@ Component.register('sales-channel-snippet-list', {
         onFilterChange() {
             this.deletedSnippetIds = [];
             this.persistedSnippetIds = [];
-            this.snippetSearchResults = [];
-            this.hasSnippetSearchRun = false;
+            this.selectedLocaleCode = null;
+            this.clearSnippetSearchState();
             this.loadSnippets();
         },
 
@@ -106,11 +107,34 @@ Component.register('sales-channel-snippet-list', {
             return snippet;
         },
 
+        onSnippetKeyInput(snippet) {
+            const searchKey = this.getSnippetSearchKey(snippet);
+            const term = (snippet.translationKey || '').trim();
+
+            this.clearSnippetSearchTimer(searchKey);
+
+            if (!this.filters.languageId || term.length < 2) {
+                this.setSnippetSearchResults(searchKey, []);
+                this.setSnippetSearchLoading(searchKey, false);
+                return;
+            }
+
+            this.setSnippetSearchLoading(searchKey, true);
+
+            this.snippetSearchTimers = {
+                ...this.snippetSearchTimers,
+                [searchKey]: window.setTimeout(() => {
+                    this.searchExistingSnippets(snippet, searchKey, term);
+                }, 300),
+            };
+        },
+
         removeSnippet(snippet) {
             if (snippet.id && this.persistedSnippetIds.includes(snippet.id)) {
                 this.deletedSnippetIds.push(snippet.id);
             }
 
+            this.clearSnippetSearchTimer(this.getSnippetSearchKey(snippet));
             this.snippets = this.snippets.filter((candidate) => candidate !== snippet);
         },
 
@@ -150,31 +174,31 @@ Component.register('sales-channel-snippet-list', {
             }
         },
 
-        async searchExistingSnippets() {
-            if (!this.filters.languageId || !this.snippetSearchTerm.trim()) {
-                this.snippetSearchResults = [];
-                this.hasSnippetSearchRun = false;
-                return;
-            }
-
-            this.isSnippetSearchLoading = true;
-            this.hasSnippetSearchRun = true;
-
+        async searchExistingSnippets(snippet, searchKey, term) {
             try {
                 const localeCode = await this.getSelectedLocaleCode();
-                this.snippetSearchResults = await this.searchSnippetRepository(localeCode);
+                const results = await this.searchSnippetRepository(localeCode, term);
+
+                if ((snippet.translationKey || '').trim() !== term) {
+                    return;
+                }
+
+                this.setSnippetSearchResults(searchKey, results);
             } catch (error) {
-                this.snippetSearchResults = [];
-                this.hasSnippetSearchRun = false;
+                this.setSnippetSearchResults(searchKey, []);
                 this.createNotificationError({
                     message: this.$tc('sales-channel-snippets.notifications.searchError'),
                 });
             } finally {
-                this.isSnippetSearchLoading = false;
+                this.setSnippetSearchLoading(searchKey, false);
             }
         },
 
         async getSelectedLocaleCode() {
+            if (this.selectedLocaleCode) {
+                return this.selectedLocaleCode;
+            }
+
             const criteria = new Criteria(1, 1);
             criteria.addAssociation('locale');
 
@@ -184,12 +208,13 @@ Component.register('sales-channel-snippet-list', {
                 criteria,
             );
 
-            return language.locale.code;
+            this.selectedLocaleCode = language.locale.code;
+
+            return this.selectedLocaleCode;
         },
 
-        async searchSnippetRepository(localeCode) {
+        async searchSnippetRepository(localeCode, term) {
             const criteria = new Criteria(1, 25);
-            const term = this.snippetSearchTerm.trim();
 
             criteria.addAssociation('snippetSet');
             criteria.addFilter(Criteria.equals('snippetSet.iso', localeCode));
@@ -211,15 +236,65 @@ Component.register('sales-channel-snippet-list', {
             });
         },
 
-        useExistingSnippet(result) {
+        useExistingSnippet(snippet, result) {
             if (!this.canEdit) {
                 return;
             }
 
-            this.snippets.unshift(this.createSnippet({
-                translationKey: result.translationKey,
-                value: result.value,
-            }));
+            snippet.translationKey = result.translationKey;
+            snippet.value = result.value;
+            this.setSnippetSearchResults(this.getSnippetSearchKey(snippet), []);
+        },
+
+        getSnippetSearchKey(snippet) {
+            if (!snippet._salesChannelSnippetSearchKey) {
+                snippet._salesChannelSnippetSearchKey = `snippet-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+            }
+
+            return snippet.id || snippet._uniqueIdentifier || snippet._salesChannelSnippetSearchKey;
+        },
+
+        getSnippetSearchResults(snippet) {
+            return this.snippetSearchResults[this.getSnippetSearchKey(snippet)] || [];
+        },
+
+        isSnippetSearchLoading(snippet) {
+            return this.snippetSearchLoading[this.getSnippetSearchKey(snippet)] || false;
+        },
+
+        setSnippetSearchResults(searchKey, results) {
+            this.snippetSearchResults = {
+                ...this.snippetSearchResults,
+                [searchKey]: results,
+            };
+        },
+
+        setSnippetSearchLoading(searchKey, isLoading) {
+            this.snippetSearchLoading = {
+                ...this.snippetSearchLoading,
+                [searchKey]: isLoading,
+            };
+        },
+
+        clearSnippetSearchTimer(searchKey) {
+            if (!this.snippetSearchTimers[searchKey]) {
+                return;
+            }
+
+            window.clearTimeout(this.snippetSearchTimers[searchKey]);
+            const timers = { ...this.snippetSearchTimers };
+            delete timers[searchKey];
+            this.snippetSearchTimers = timers;
+        },
+
+        clearSnippetSearchState() {
+            Object.keys(this.snippetSearchTimers).forEach((searchKey) => {
+                window.clearTimeout(this.snippetSearchTimers[searchKey]);
+            });
+
+            this.snippetSearchTimers = {};
+            this.snippetSearchResults = {};
+            this.snippetSearchLoading = {};
         },
 
         async deleteSnippet(id) {

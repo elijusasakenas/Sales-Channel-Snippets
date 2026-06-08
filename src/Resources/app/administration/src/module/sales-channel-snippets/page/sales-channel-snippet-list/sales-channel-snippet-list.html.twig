@@ -64,63 +64,39 @@
                 <div
                     v-else
                     class="sales-channel-snippet-list__rows">
-                    <div class="sales-channel-snippet-list__search">
-                        <sw-text-field
-                            v-model:value="snippetSearchTerm"
-                            :label="$tc('sales-channel-snippets.fields.searchExisting')"
-                            :placeholder="$tc('sales-channel-snippets.placeholders.searchExisting')"
-                            @keyup.enter="searchExistingSnippets" />
-
-                        <sw-button
-                            :disabled="isSnippetSearchLoading || !snippetSearchTerm"
-                            @click="searchExistingSnippets">
-                            {{ $tc('sales-channel-snippets.actions.search') }}
-                        </sw-button>
-                    </div>
-
-                    <div
-                        v-if="isSnippetSearchLoading"
-                        class="sales-channel-snippet-list__search-loader">
-                        <sw-loader />
-                    </div>
-
-                    <div
-                        v-else-if="snippetSearchResults.length > 0"
-                        class="sales-channel-snippet-list__results">
-                        <div
-                            v-for="result in snippetSearchResults"
-                            :key="result.translationKey + result.locale"
-                            class="sales-channel-snippet-list__result">
-                            <div class="sales-channel-snippet-list__result-text">
-                                <strong>{{ result.translationKey }}</strong>
-                                <span>{{ result.value }}</span>
-                                <small>{{ result.snippetSetName }} - {{ result.locale }}</small>
-                            </div>
-
-                            <sw-button
-                                size="small"
-                                @click="useExistingSnippet(result)">
-                                {{ $tc('sales-channel-snippets.actions.use') }}
-                            </sw-button>
-                        </div>
-                    </div>
-
-                    <div
-                        v-else-if="hasSnippetSearchRun"
-                        class="sales-channel-snippet-list__notice">
-                        <strong>{{ $tc('sales-channel-snippets.empty.noSearchResultsTitle') }}</strong>
-                        <span>{{ $tc('sales-channel-snippets.empty.noSearchResultsSubline') }}</span>
-                    </div>
-
                     <div
                         v-for="snippet in snippets"
                         :key="snippet.id || snippet._uniqueIdentifier"
                         class="sales-channel-snippet-list__row">
-                        <sw-text-field
-                            v-model:value="snippet.translationKey"
-                            required
-                            :label="$tc('sales-channel-snippets.fields.key')"
-                            :placeholder="$tc('sales-channel-snippets.placeholders.key')" />
+                        <div class="sales-channel-snippet-list__key-field">
+                            <sw-text-field
+                                v-model:value="snippet.translationKey"
+                                required
+                                :label="$tc('sales-channel-snippets.fields.key')"
+                                :placeholder="$tc('sales-channel-snippets.placeholders.key')"
+                                @update:value="onSnippetKeyInput(snippet)" />
+
+                            <div
+                                v-if="isSnippetSearchLoading(snippet)"
+                                class="sales-channel-snippet-list__inline-loader">
+                                {{ $tc('sales-channel-snippets.search.loading') }}
+                            </div>
+
+                            <div
+                                v-else-if="getSnippetSearchResults(snippet).length > 0"
+                                class="sales-channel-snippet-list__inline-results">
+                                <button
+                                    v-for="result in getSnippetSearchResults(snippet)"
+                                    :key="result.translationKey + result.locale"
+                                    type="button"
+                                    class="sales-channel-snippet-list__inline-result"
+                                    @click="useExistingSnippet(snippet, result)">
+                                    <strong>{{ result.translationKey }}</strong>
+                                    <span>{{ result.value }}</span>
+                                    <small>{{ result.snippetSetName }} - {{ result.locale }}</small>
+                                </button>
+                            </div>
+                        </div>
 
                         <sw-textarea-field
                             v-model:value="snippet.value"
