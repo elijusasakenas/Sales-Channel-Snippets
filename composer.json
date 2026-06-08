@@ -1,6 +1,7 @@
 {
   "name": "elijusasakenas/sales-channel-snippets",
   "description": "Admin-managed sales-channel-specific snippet overrides for Shopware 6.",
+  "version": "0.1.10",
   "type": "shopware-platform-plugin",
   "license": "MIT",
   "autoload": {
