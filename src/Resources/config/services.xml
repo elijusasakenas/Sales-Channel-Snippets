@@ -7,7 +7,7 @@
         <defaults autowire="true" autoconfigure="true"/>
 
         <service id="SalesChannelSnippets\Core\Content\SalesChannelSnippet\SalesChannelSnippetDefinition">
-            <tag name="shopware.entity.definition"/>
+            <tag name="shopware.entity.definition" entity="sales_channel_snippet"/>
         </service>
 
         <service id="SalesChannelSnippets\Translation\SalesChannelSnippetTranslator" decorates="translator">

@@ -4,6 +4,14 @@ All notable changes to Sales Channel Snippets will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.1.8] - 2026-06-08
+
+### Fixed
+
+- Removed the Administration dependency on a generated `sales_channel_snippet` entity schema.
+- Switched sales channel snippet override reads/writes to Admin API HTTP calls.
+- Added the explicit custom entity name to the Shopware entity-definition service tag.
+
 ## [0.1.7] - 2026-06-08
 
 ### Fixed
