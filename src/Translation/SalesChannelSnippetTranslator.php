@@ -2,11 +2,8 @@
 
 namespace SalesChannelSnippets\Translation;
 
-use SalesChannelSnippets\Core\Content\SalesChannelSnippet\SalesChannelSnippetEntity;
-use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Doctrine\DBAL\Connection;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +22,7 @@ class SalesChannelSnippetTranslator implements TranslatorInterface, LocaleAwareI
 
     public function __construct(
         private readonly TranslatorInterface $inner,
-        private readonly EntityRepository $salesChannelSnippetRepository,
+        private readonly Connection $connection,
         private readonly RequestStack $requestStack
     ) {
     }
@@ -95,23 +92,33 @@ class SalesChannelSnippetTranslator implements TranslatorInterface, LocaleAwareI
             return $this->snippetCache[$cacheKey];
         }
 
-        $criteria = (new Criteria())
-            ->addFilter(new EqualsFilter('salesChannelId', $salesChannelId))
-            ->addFilter(new EqualsFilter('languageId', $languageId))
-            ->addFilter(new EqualsFilter('translationKey', $translationKey))
-            ->setLimit(1);
-
-        $snippet = $this->salesChannelSnippetRepository
-            ->search($criteria, Context::createDefaultContext())
-            ->first();
-
-        if (!$snippet instanceof SalesChannelSnippetEntity) {
+        if (!Uuid::isValid($salesChannelId) || !Uuid::isValid($languageId)) {
             $this->snippetCache[$cacheKey] = null;
 
-            return null;
+            return $this->snippetCache[$cacheKey];
         }
 
-        $this->snippetCache[$cacheKey] = $snippet->getValue();
+        try {
+            $snippet = $this->connection->fetchOne(
+                'SELECT `value`
+                 FROM `sales_channel_snippet`
+                 WHERE `sales_channel_id` = :salesChannelId
+                   AND `language_id` = :languageId
+                   AND `translation_key` = :translationKey
+                 LIMIT 1',
+                [
+                    'salesChannelId' => Uuid::fromHexToBytes($salesChannelId),
+                    'languageId' => Uuid::fromHexToBytes($languageId),
+                    'translationKey' => $translationKey,
+                ]
+            );
+        } catch (\Throwable) {
+            $this->snippetCache[$cacheKey] = null;
+
+            return $this->snippetCache[$cacheKey];
+        }
+
+        $this->snippetCache[$cacheKey] = \is_string($snippet) ? $snippet : null;
 
         return $this->snippetCache[$cacheKey];
     }

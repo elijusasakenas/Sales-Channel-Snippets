@@ -12,7 +12,7 @@
 
         <service id="SalesChannelSnippets\Translation\SalesChannelSnippetTranslator" decorates="translator">
             <argument type="service" id="SalesChannelSnippets\Translation\SalesChannelSnippetTranslator.inner"/>
-            <argument type="service" id="sales_channel_snippet.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="request_stack"/>
         </service>
 
