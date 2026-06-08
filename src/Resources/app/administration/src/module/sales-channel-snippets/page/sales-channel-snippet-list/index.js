@@ -24,6 +24,7 @@ Component.register('sales-channel-snippet-list', {
             },
             snippets: [],
             deletedSnippetIds: [],
+            persistedSnippetIds: [],
             isLoading: false,
             processSuccess: false,
             loadError: false,
@@ -44,6 +45,7 @@ Component.register('sales-channel-snippet-list', {
         async loadSnippets() {
             if (!this.canEdit) {
                 this.snippets = [];
+                this.persistedSnippetIds = [];
                 this.isLoading = false;
                 this.loadError = false;
                 return;
@@ -59,8 +61,10 @@ Component.register('sales-channel-snippet-list', {
 
             try {
                 this.snippets = await this.repository.search(criteria, Context.api);
+                this.persistedSnippetIds = this.snippets.map((snippet) => snippet.id);
             } catch (error) {
                 this.snippets = [];
+                this.persistedSnippetIds = [];
                 this.loadError = true;
                 this.createNotificationError({
                     message: this.$tc('sales-channel-snippets.notifications.loadError'),
@@ -72,6 +76,7 @@ Component.register('sales-channel-snippet-list', {
 
         onFilterChange() {
             this.deletedSnippetIds = [];
+            this.persistedSnippetIds = [];
             this.loadSnippets();
         },
 
@@ -90,7 +95,7 @@ Component.register('sales-channel-snippet-list', {
         },
 
         removeSnippet(snippet) {
-            if (snippet.id) {
+            if (snippet.id && this.persistedSnippetIds.includes(snippet.id)) {
                 this.deletedSnippetIds.push(snippet.id);
             }
 
@@ -107,7 +112,7 @@ Component.register('sales-channel-snippet-list', {
             this.loadError = false;
 
             try {
-                await Promise.all(this.deletedSnippetIds.map((id) => this.repository.delete(id, Context.api)));
+                await Promise.all(this.deletedSnippetIds.map((id) => this.deleteSnippet(id)));
 
                 const snippetsToSave = this.snippets.filter((snippet) => {
                     return snippet.translationKey && snippet.translationKey.trim() && snippet.value !== null;
@@ -131,6 +136,24 @@ Component.register('sales-channel-snippet-list', {
             } finally {
                 this.isLoading = false;
             }
+        },
+
+        async deleteSnippet(id) {
+            try {
+                await this.repository.delete(id, Context.api);
+            } catch (error) {
+                if (!this.isNotFoundError(error)) {
+                    throw error;
+                }
+            }
+        },
+
+        isNotFoundError(error) {
+            const errors = (((error || {}).response || {}).data || {}).errors || [];
+
+            return errors.some((apiError) => {
+                return apiError.status === '404' || apiError.code === 'FRAMEWORK__RESOURCE_NOT_FOUND';
+            });
         },
 
         saveFinish() {
