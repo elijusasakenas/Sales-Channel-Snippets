@@ -216,8 +216,8 @@ Component.register('sales-channel-snippet-list', {
         async searchSnippetRepository(localeCode, term) {
             const criteria = new Criteria(1, 25);
 
-            criteria.addAssociation('snippetSet');
-            criteria.addFilter(Criteria.equals('snippetSet.iso', localeCode));
+            criteria.addAssociation('set');
+            criteria.addFilter(Criteria.equals('set.iso', localeCode));
             criteria.addFilter(Criteria.multi('OR', [
                 Criteria.contains('translationKey', term),
                 Criteria.contains('value', term),
@@ -230,8 +230,8 @@ Component.register('sales-channel-snippet-list', {
                 return {
                     translationKey: snippet.translationKey,
                     value: snippet.value,
-                    snippetSetName: snippet.snippetSet ? snippet.snippetSet.name : '',
-                    locale: snippet.snippetSet ? snippet.snippetSet.iso : localeCode,
+                    snippetSetName: snippet.set ? snippet.set.name : '',
+                    locale: snippet.set ? snippet.set.iso : localeCode,
                 };
             });
         },
