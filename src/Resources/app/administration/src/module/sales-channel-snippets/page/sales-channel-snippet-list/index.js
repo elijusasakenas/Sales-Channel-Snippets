@@ -4,6 +4,13 @@ import './sales-channel-snippet-list.scss';
 const { Component, Context, Mixin } = Shopware;
 const { Criteria } = Shopware.Data;
 
+const SALES_CHANNEL_SNIPPET_ENTITY = 'sales_channel_snippet';
+const SALES_CHANNEL_SNIPPET_API_ROUTE = 'sales-channel-snippet';
+const INLINE_SEARCH_DELAY = 300;
+const INLINE_SEARCH_MIN_LENGTH = 2;
+const SNIPPET_SEARCH_LIMIT = 25;
+const OVERRIDE_LIST_LIMIT = 100;
+
 Component.register('sales-channel-snippet-list', {
     template,
 
@@ -17,7 +24,6 @@ Component.register('sales-channel-snippet-list', {
 
     data() {
         return {
-            repository: null,
             filters: {
                 salesChannelId: null,
                 languageId: null,
@@ -60,7 +66,7 @@ Component.register('sales-channel-snippet-list', {
             this.isLoading = true;
             this.loadError = false;
 
-            const criteria = new Criteria(1, 100);
+            const criteria = new Criteria(1, OVERRIDE_LIST_LIMIT);
             criteria.addFilter(Criteria.equals('salesChannelId', this.filters.salesChannelId));
             criteria.addFilter(Criteria.equals('languageId', this.filters.languageId));
             criteria.addSorting(Criteria.sort('translationKey', 'ASC'));
@@ -100,11 +106,10 @@ Component.register('sales-channel-snippet-list', {
         createSnippet(defaults = {}) {
             return {
                 id: defaults.id || this.createEntityId(),
-                salesChannelId: this.filters.salesChannelId,
-                languageId: this.filters.languageId,
+                salesChannelId: defaults.salesChannelId || this.filters.salesChannelId,
+                languageId: defaults.languageId || this.filters.languageId,
                 translationKey: defaults.translationKey || '',
                 value: defaults.value || '',
-                isNew: defaults.isNew !== false,
             };
         },
 
@@ -114,7 +119,7 @@ Component.register('sales-channel-snippet-list', {
 
             this.clearSnippetSearchTimer(searchKey);
 
-            if (!this.filters.languageId || term.length < 2) {
+            if (!this.filters.languageId || term.length < INLINE_SEARCH_MIN_LENGTH) {
                 this.setSnippetSearchResults(searchKey, []);
                 this.setSnippetSearchLoading(searchKey, false);
                 return;
@@ -126,7 +131,7 @@ Component.register('sales-channel-snippet-list', {
                 ...this.snippetSearchTimers,
                 [searchKey]: window.setTimeout(() => {
                     this.searchExistingSnippets(snippet, searchKey, term);
-                }, 300),
+                }, INLINE_SEARCH_DELAY),
             };
         },
 
@@ -149,19 +154,13 @@ Component.register('sales-channel-snippet-list', {
             this.loadError = false;
 
             try {
-                await Promise.all(this.deletedSnippetIds.map((id) => this.deleteSnippet(id)));
-
                 const snippetsToSave = this.snippets.filter((snippet) => {
                     return snippet.translationKey && snippet.translationKey.trim() && snippet.value !== null;
                 });
 
-                snippetsToSave.forEach((snippet) => {
-                    snippet.salesChannelId = this.filters.salesChannelId;
-                    snippet.languageId = this.filters.languageId;
-                    snippet.translationKey = snippet.translationKey.trim();
-                });
+                await Promise.all(this.deletedSnippetIds.map((id) => this.deleteSnippet(id)));
 
-                await Promise.all(snippetsToSave.map((snippet) => this.saveSalesChannelSnippet(snippet)));
+                await this.upsertSalesChannelSnippets(snippetsToSave);
 
                 this.deletedSnippetIds = [];
                 this.processSuccess = true;
@@ -177,10 +176,10 @@ Component.register('sales-channel-snippet-list', {
 
         async searchSalesChannelSnippets(criteria) {
             const response = await this.httpClient.post(
-                '/search/sales-channel-snippet',
+                `/search/${SALES_CHANNEL_SNIPPET_API_ROUTE}`,
                 criteria.parse(),
                 {
-                    headers: this.getBasicHeaders(),
+                    headers: this.getJsonHeaders(),
                 },
             );
 
@@ -193,31 +192,36 @@ Component.register('sales-channel-snippet-list', {
                     languageId: attributes.languageId,
                     translationKey: attributes.translationKey,
                     value: attributes.value,
-                    isNew: false,
                 });
             });
         },
 
-        async saveSalesChannelSnippet(snippet) {
-            const payload = {
-                id: snippet.id,
-                salesChannelId: this.filters.salesChannelId,
-                languageId: this.filters.languageId,
-                translationKey: snippet.translationKey.trim(),
-                value: snippet.value,
-            };
+        async upsertSalesChannelSnippets(snippets) {
+            const payload = snippets.map((snippet) => {
+                return {
+                    id: snippet.id,
+                    salesChannelId: this.filters.salesChannelId,
+                    languageId: this.filters.languageId,
+                    translationKey: snippet.translationKey.trim(),
+                    value: snippet.value,
+                };
+            });
+
+            if (payload.length === 0) {
+                return;
+            }
 
             await this.httpClient.post(
                 '/_action/sync',
                 {
                     'sales-channel-snippet-upsert': {
-                        entity: 'sales_channel_snippet',
+                        entity: SALES_CHANNEL_SNIPPET_ENTITY,
                         action: 'upsert',
-                        payload: [payload],
+                        payload,
                     },
                 },
                 {
-                    headers: this.getBasicHeaders(),
+                    headers: this.getJsonHeaders(),
                 },
             );
         },
@@ -262,7 +266,7 @@ Component.register('sales-channel-snippet-list', {
         },
 
         async searchSnippetRepository(localeCode, term) {
-            const criteria = new Criteria(1, 25);
+            const criteria = new Criteria(1, SNIPPET_SEARCH_LIMIT);
 
             criteria.addAssociation('set');
             criteria.addFilter(Criteria.equals('set.iso', localeCode));
@@ -351,13 +355,13 @@ Component.register('sales-channel-snippet-list', {
                     '/_action/sync',
                     {
                         'sales-channel-snippet-delete': {
-                            entity: 'sales_channel_snippet',
+                            entity: SALES_CHANNEL_SNIPPET_ENTITY,
                             action: 'delete',
                             payload: [{ id }],
                         },
                     },
                     {
-                        headers: this.getBasicHeaders(),
+                        headers: this.getJsonHeaders(),
                     },
                 );
             } catch (error) {
@@ -375,7 +379,7 @@ Component.register('sales-channel-snippet-list', {
             });
         },
 
-        getBasicHeaders() {
+        getJsonHeaders() {
             return {
                 Accept: 'application/vnd.api+json',
                 'Content-Type': 'application/json',

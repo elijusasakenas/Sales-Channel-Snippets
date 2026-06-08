@@ -20,6 +20,8 @@ use Shopware\Core\System\SalesChannel\SalesChannelDefinition;
 class SalesChannelSnippetDefinition extends EntityDefinition
 {
     public const ENTITY_NAME = 'sales_channel_snippet';
+    public const TABLE_NAME = 'sales_channel_snippet';
+    public const CACHE_TAG = 'sales-channel-snippet';
 
     public function getEntityName(): string
     {

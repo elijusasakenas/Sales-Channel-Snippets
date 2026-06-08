@@ -3,6 +3,7 @@
 namespace SalesChannelSnippets\Translation;
 
 use Doctrine\DBAL\Connection;
+use SalesChannelSnippets\Core\Content\SalesChannelSnippet\SalesChannelSnippetDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -100,12 +101,15 @@ class SalesChannelSnippetTranslator implements TranslatorInterface, LocaleAwareI
 
         try {
             $snippet = $this->connection->fetchOne(
-                'SELECT `value`
-                 FROM `sales_channel_snippet`
-                 WHERE `sales_channel_id` = :salesChannelId
-                   AND `language_id` = :languageId
-                   AND `translation_key` = :translationKey
-                 LIMIT 1',
+                sprintf(
+                    'SELECT `value`
+                     FROM `%s`
+                     WHERE `sales_channel_id` = :salesChannelId
+                       AND `language_id` = :languageId
+                       AND `translation_key` = :translationKey
+                     LIMIT 1',
+                    SalesChannelSnippetDefinition::TABLE_NAME
+                ),
                 [
                     'salesChannelId' => Uuid::fromHexToBytes($salesChannelId),
                     'languageId' => Uuid::fromHexToBytes($languageId),

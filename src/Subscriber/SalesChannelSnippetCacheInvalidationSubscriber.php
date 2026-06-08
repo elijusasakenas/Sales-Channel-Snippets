@@ -32,7 +32,7 @@ class SalesChannelSnippetCacheInvalidationSubscriber implements EventSubscriberI
             }
 
             $this->cacheInvalidator->invalidate([
-                'sales-channel-snippet',
+                SalesChannelSnippetDefinition::CACHE_TAG,
                 'translation',
                 'snippet',
             ]);

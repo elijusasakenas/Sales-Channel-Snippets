@@ -4,6 +4,14 @@ All notable changes to Sales Channel Snippets will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.1.9] - 2026-06-08
+
+### Changed
+
+- Centralized reusable backend constants for the custom entity, table, and cache tag.
+- Batched Administration upserts through the sync endpoint.
+- Removed stale Administration state from the snippet override row model.
+
 ## [0.1.8] - 2026-06-08
 
 ### Fixed
