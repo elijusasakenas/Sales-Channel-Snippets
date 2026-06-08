@@ -4,9 +4,9 @@ Shopware 6 plugin for Admin-managed snippet overrides per sales channel and lang
 
 ## Version
 
-Current version: `0.1.0`
+Current version: `0.1.1`
 
-Packagist versions are created from Git tags, for example `v0.1.0`.
+Packagist versions are created from Git tags, for example `v0.1.1`.
 
 ## What it does
 
@@ -36,6 +36,8 @@ bin/console administration:build
 ```
 
 The module appears under Settings > Extensions > Sales Channel Snippets.
+
+This plugin does not modify Shopware's native Settings > Snippets detail page. To create a sales-channel-specific value, open Settings > Sales Channel Snippets and select the sales channel, language, snippet key, and override value there.
 
 ## Notes
 

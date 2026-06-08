@@ -27,10 +27,21 @@ Module.register('sales-channel-snippets', {
         },
     },
 
-    settingsItem: {
+    navigation: [{
+        id: 'sales-channel-snippets',
+        label: 'sales-channel-snippets.general.mainMenuItemGeneral',
+        color: '#0f766e',
+        path: 'sales.channel.snippets.index',
+        icon: 'regular-comments',
+        parent: 'sw-settings',
+        position: 110,
+        privilege: 'system.system_config',
+    }],
+
+    settingsItem: [{
         group: 'plugins',
         to: 'sales.channel.snippets.index',
         icon: 'regular-comments',
         privilege: 'system.system_config',
-    },
+    }],
 });
