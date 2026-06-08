@@ -4,6 +4,13 @@ All notable changes to Sales Channel Snippets will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.1.4] - 2026-06-08
+
+### Added
+
+- Added an Administration search for existing Shopware snippets by key or value.
+- Added selectable search results that prefill the override key and current value.
+
 ## [0.1.3] - 2026-06-08
 
 ### Fixed

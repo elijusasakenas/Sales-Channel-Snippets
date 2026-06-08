@@ -17,5 +17,9 @@
         </service>
 
         <service id="SalesChannelSnippets\Subscriber\SalesChannelSnippetCacheInvalidationSubscriber"/>
+
+        <service id="SalesChannelSnippets\Controller\SnippetSearchController" public="true">
+            <tag name="controller.service_arguments"/>
+        </service>
     </services>
 </container>

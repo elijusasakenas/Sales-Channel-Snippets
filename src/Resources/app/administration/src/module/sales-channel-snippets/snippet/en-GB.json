@@ -7,7 +7,9 @@
     "actions": {
       "add": "Add snippet",
       "remove": "Remove",
-      "save": "Save"
+      "save": "Save",
+      "search": "Search",
+      "use": "Use"
     },
     "cards": {
       "assignment": "Assignment",
@@ -19,20 +21,25 @@
       "noSnippetsTitle": "No snippet overrides",
       "noSnippetsSubline": "Click Add snippet to create the first key and value for this assignment.",
       "loadErrorTitle": "Could not load snippet overrides",
-      "loadErrorSubline": "Please rebuild the Administration and clear the cache, then try again."
+      "loadErrorSubline": "Please rebuild the Administration and clear the cache, then try again.",
+      "noSearchResultsTitle": "No matching snippets",
+      "noSearchResultsSubline": "Try another snippet key or part of the current value."
     },
     "fields": {
       "key": "Snippet key",
       "language": "Language",
+      "searchExisting": "Search existing snippets",
       "salesChannel": "Sales channel",
       "value": "Custom value"
     },
     "placeholders": {
-      "key": "checkout.confirmSubmit"
+      "key": "checkout.confirmSubmit",
+      "searchExisting": "Search by key or current value"
     },
     "notifications": {
       "loadError": "Could not load sales channel snippet overrides.",
-      "saveError": "Could not save sales channel snippet overrides."
+      "saveError": "Could not save sales channel snippet overrides.",
+      "searchError": "Could not search existing snippets."
     }
   }
 }

@@ -28,6 +28,10 @@ Component.register('sales-channel-snippet-list', {
             isLoading: false,
             processSuccess: false,
             loadError: false,
+            snippetSearchTerm: '',
+            snippetSearchResults: [],
+            isSnippetSearchLoading: false,
+            hasSnippetSearchRun: false,
         };
     },
 
@@ -39,6 +43,7 @@ Component.register('sales-channel-snippet-list', {
 
     created() {
         this.repository = this.repositoryFactory.create('sales_channel_snippet');
+        this.httpClient = Shopware.Application.getContainer('init').httpClient;
     },
 
     methods: {
@@ -77,6 +82,8 @@ Component.register('sales-channel-snippet-list', {
         onFilterChange() {
             this.deletedSnippetIds = [];
             this.persistedSnippetIds = [];
+            this.snippetSearchResults = [];
+            this.hasSnippetSearchRun = false;
             this.loadSnippets();
         },
 
@@ -85,13 +92,17 @@ Component.register('sales-channel-snippet-list', {
                 return;
             }
 
+            this.snippets.unshift(this.createSnippet());
+        },
+
+        createSnippet(defaults = {}) {
             const snippet = this.repository.create(Context.api);
             snippet.salesChannelId = this.filters.salesChannelId;
             snippet.languageId = this.filters.languageId;
-            snippet.translationKey = '';
-            snippet.value = '';
+            snippet.translationKey = defaults.translationKey || '';
+            snippet.value = defaults.value || '';
 
-            this.snippets.unshift(snippet);
+            return snippet;
         },
 
         removeSnippet(snippet) {
@@ -136,6 +147,50 @@ Component.register('sales-channel-snippet-list', {
             } finally {
                 this.isLoading = false;
             }
+        },
+
+        async searchExistingSnippets() {
+            if (!this.filters.languageId || !this.snippetSearchTerm.trim()) {
+                this.snippetSearchResults = [];
+                this.hasSnippetSearchRun = false;
+                return;
+            }
+
+            this.isSnippetSearchLoading = true;
+            this.hasSnippetSearchRun = true;
+
+            try {
+                const response = await this.httpClient.get(
+                    '/_action/sales-channel-snippets/snippet-search',
+                    {
+                        params: {
+                            term: this.snippetSearchTerm.trim(),
+                            languageId: this.filters.languageId,
+                        },
+                    }
+                );
+
+                this.snippetSearchResults = response.data.data || [];
+            } catch (error) {
+                this.snippetSearchResults = [];
+                this.hasSnippetSearchRun = false;
+                this.createNotificationError({
+                    message: this.$tc('sales-channel-snippets.notifications.searchError'),
+                });
+            } finally {
+                this.isSnippetSearchLoading = false;
+            }
+        },
+
+        useExistingSnippet(result) {
+            if (!this.canEdit) {
+                return;
+            }
+
+            this.snippets.unshift(this.createSnippet({
+                translationKey: result.translationKey,
+                value: result.value,
+            }));
         },
 
         async deleteSnippet(id) {

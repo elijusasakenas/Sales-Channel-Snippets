@@ -4,15 +4,16 @@ Shopware 6 plugin for Admin-managed snippet overrides per sales channel and lang
 
 ## Version
 
-Current version: `0.1.3`
+Current version: `0.1.4`
 
-Packagist versions are created from Git tags, for example `v0.1.3`.
+Packagist versions are created from Git tags, for example `v0.1.4`.
 
 ## What it does
 
 - Adds a custom `sales_channel_snippet` entity.
 - Stores one override per sales channel, language, and snippet key.
 - Adds an Administration settings module.
+- Lets admins search existing Shopware snippets by key or value before creating an override.
 - Decorates the Symfony/Shopware translator in storefront requests.
 - Falls back to the default Shopware snippet when no override exists.
 

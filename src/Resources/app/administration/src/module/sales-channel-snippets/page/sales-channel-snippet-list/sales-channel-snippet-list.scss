@@ -10,6 +10,60 @@
         gap: 24px;
     }
 
+    &__search {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) auto;
+        gap: 16px;
+        align-items: end;
+    }
+
+    &__search-loader {
+        position: relative;
+        min-height: 80px;
+    }
+
+    &__results {
+        display: grid;
+        border: 1px solid #d1d9e0;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    &__result {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #d1d9e0;
+
+        &:last-child {
+            border-bottom: 0;
+        }
+    }
+
+    &__result-text {
+        display: grid;
+        gap: 6px;
+        min-width: 0;
+
+        strong,
+        span,
+        small {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        span {
+            color: #52667a;
+        }
+
+        small {
+            color: #7b8b9a;
+        }
+    }
+
     &__loader {
         position: relative;
         min-height: 120px;
