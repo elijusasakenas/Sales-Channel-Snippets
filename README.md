@@ -2,6 +2,12 @@
 
 Shopware 6 plugin for Admin-managed snippet overrides per sales channel and language.
 
+## Version
+
+Current version: `0.1.0`
+
+Packagist versions are created from Git tags, for example `v0.1.0`.
+
 ## What it does
 
 - Adds a custom `sales_channel_snippet` entity.
@@ -38,6 +44,10 @@ This plugin intentionally keeps the default snippet system as the fallback sourc
 ## Contributing
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution guidelines.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## License
 
