@@ -4,6 +4,13 @@ All notable changes to Sales Channel Snippets will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.1.10] - 2026-06-08
+
+### Fixed
+
+- Improved live snippet search reliability for broad keys such as `account`.
+- Split snippet autocomplete into separate key and value searches, then merged and ranked results locally.
+
 ## [0.1.9] - 2026-06-08
 
 ### Changed

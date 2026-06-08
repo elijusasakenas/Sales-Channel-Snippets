@@ -8,7 +8,8 @@ const SALES_CHANNEL_SNIPPET_ENTITY = 'sales_channel_snippet';
 const SALES_CHANNEL_SNIPPET_API_ROUTE = 'sales-channel-snippet';
 const INLINE_SEARCH_DELAY = 300;
 const INLINE_SEARCH_MIN_LENGTH = 2;
-const SNIPPET_SEARCH_LIMIT = 25;
+const SNIPPET_SEARCH_LIMIT = 50;
+const SNIPPET_RESULT_LIMIT = 25;
 const OVERRIDE_LIST_LIMIT = 100;
 
 Component.register('sales-channel-snippet-list', {
@@ -266,14 +267,24 @@ Component.register('sales-channel-snippet-list', {
         },
 
         async searchSnippetRepository(localeCode, term) {
+            const normalizedTerm = this.normalizeSearchTerm(term);
+            const [keyResults, valueResults] = await Promise.all([
+                this.searchSnippetField(localeCode, normalizedTerm, 'translationKey'),
+                this.searchSnippetField(localeCode, normalizedTerm, 'value'),
+            ]);
+
+            return this.rankSnippetSearchResults(
+                this.mergeSnippetSearchResults([...keyResults, ...valueResults]),
+                normalizedTerm,
+            ).slice(0, SNIPPET_RESULT_LIMIT);
+        },
+
+        async searchSnippetField(localeCode, term, field) {
             const criteria = new Criteria(1, SNIPPET_SEARCH_LIMIT);
 
             criteria.addAssociation('set');
             criteria.addFilter(Criteria.equals('set.iso', localeCode));
-            criteria.addFilter(Criteria.multi('OR', [
-                Criteria.contains('translationKey', term),
-                Criteria.contains('value', term),
-            ]));
+            criteria.addFilter(Criteria.contains(field, term));
             criteria.addSorting(Criteria.sort('translationKey', 'ASC'));
 
             const result = await this.snippetRepository.search(criteria, Context.api);
@@ -286,6 +297,56 @@ Component.register('sales-channel-snippet-list', {
                     locale: snippet.set ? snippet.set.iso : localeCode,
                 };
             });
+        },
+
+        mergeSnippetSearchResults(results) {
+            return Object.values(results.reduce((merged, result) => {
+                merged[`${result.locale}:${result.translationKey}`] = result;
+
+                return merged;
+            }, {}));
+        },
+
+        rankSnippetSearchResults(results, term) {
+            const lowerTerm = term.toLowerCase();
+
+            return results.sort((first, second) => {
+                const firstScore = this.getSnippetSearchScore(first, lowerTerm);
+                const secondScore = this.getSnippetSearchScore(second, lowerTerm);
+
+                if (firstScore !== secondScore) {
+                    return firstScore - secondScore;
+                }
+
+                return first.translationKey.localeCompare(second.translationKey);
+            });
+        },
+
+        getSnippetSearchScore(result, lowerTerm) {
+            const key = (result.translationKey || '').toLowerCase();
+            const value = (result.value || '').toLowerCase();
+
+            if (key === lowerTerm) {
+                return 0;
+            }
+
+            if (key.startsWith(`${lowerTerm}.`) || key.startsWith(lowerTerm)) {
+                return 1;
+            }
+
+            if (key.includes(lowerTerm)) {
+                return 2;
+            }
+
+            if (value.includes(lowerTerm)) {
+                return 3;
+            }
+
+            return 4;
+        },
+
+        normalizeSearchTerm(term) {
+            return term.trim().replace(/\s+/g, '.');
         },
 
         useExistingSnippet(snippet, result) {

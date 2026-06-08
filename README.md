@@ -4,9 +4,9 @@ Shopware 6 plugin for Admin-managed snippet overrides per sales channel and lang
 
 ## Version
 
-Current version: `0.1.9`
+Current version: `0.1.10`
 
-Packagist versions are created from Git tags, for example `v0.1.9`.
+Packagist versions are created from Git tags, for example `v0.1.10`.
 
 ## What it does
 
