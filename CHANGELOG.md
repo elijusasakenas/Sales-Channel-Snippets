@@ -4,6 +4,13 @@ All notable changes to Sales Channel Snippets will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.1.2] - 2026-06-08
+
+### Fixed
+
+- Improved the Administration override list loading, empty, and error states.
+- Marked custom entity fields as Admin API aware.
+
 ## [0.1.1] - 2026-06-08
 
 ### Fixed

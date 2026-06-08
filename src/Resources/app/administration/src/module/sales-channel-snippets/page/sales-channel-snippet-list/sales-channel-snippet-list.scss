@@ -10,6 +10,35 @@
         gap: 24px;
     }
 
+    &__loader {
+        position: relative;
+        min-height: 120px;
+    }
+
+    &__notice {
+        display: grid;
+        gap: 8px;
+        padding: 24px;
+        color: #52667a;
+
+        strong {
+            color: #33475b;
+            font-size: 16px;
+        }
+
+        span {
+            line-height: 22px;
+        }
+
+        &--error {
+            color: #de294c;
+
+            strong {
+                color: #de294c;
+            }
+        }
+    }
+
     &__row {
         display: grid;
         grid-template-columns: minmax(240px, 1fr) minmax(320px, 2fr) auto;

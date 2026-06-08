@@ -17,7 +17,9 @@
       "selectTitle": "Select a sales channel and language",
       "selectSubline": "Overrides are stored for exactly one sales channel and language.",
       "noSnippetsTitle": "No snippet overrides",
-      "noSnippetsSubline": "Add the first key and value for this assignment."
+      "noSnippetsSubline": "Click Add snippet to create the first key and value for this assignment.",
+      "loadErrorTitle": "Could not load snippet overrides",
+      "loadErrorSubline": "Please rebuild the Administration and clear the cache, then try again."
     },
     "fields": {
       "key": "Snippet key",
@@ -27,6 +29,10 @@
     },
     "placeholders": {
       "key": "checkout.confirmSubmit"
+    },
+    "notifications": {
+      "loadError": "Could not load sales channel snippet overrides.",
+      "saveError": "Could not save sales channel snippet overrides."
     }
   }
 }

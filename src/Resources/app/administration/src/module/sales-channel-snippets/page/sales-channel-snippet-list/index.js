@@ -1,11 +1,15 @@
 import template from './sales-channel-snippet-list.html.twig';
 import './sales-channel-snippet-list.scss';
 
-const { Component, Context } = Shopware;
+const { Component, Context, Mixin } = Shopware;
 const { Criteria } = Shopware.Data;
 
 Component.register('sales-channel-snippet-list', {
     template,
+
+    mixins: [
+        Mixin.getByName('notification'),
+    ],
 
     inject: [
         'repositoryFactory',
@@ -22,6 +26,7 @@ Component.register('sales-channel-snippet-list', {
             deletedSnippetIds: [],
             isLoading: false,
             processSuccess: false,
+            loadError: false,
         };
     },
 
@@ -39,10 +44,13 @@ Component.register('sales-channel-snippet-list', {
         async loadSnippets() {
             if (!this.canEdit) {
                 this.snippets = [];
+                this.isLoading = false;
+                this.loadError = false;
                 return;
             }
 
             this.isLoading = true;
+            this.loadError = false;
 
             const criteria = new Criteria(1, 100);
             criteria.addFilter(Criteria.equals('salesChannelId', this.filters.salesChannelId));
@@ -51,6 +59,12 @@ Component.register('sales-channel-snippet-list', {
 
             try {
                 this.snippets = await this.repository.search(criteria, Context.api);
+            } catch (error) {
+                this.snippets = [];
+                this.loadError = true;
+                this.createNotificationError({
+                    message: this.$tc('sales-channel-snippets.notifications.loadError'),
+                });
             } finally {
                 this.isLoading = false;
             }
@@ -90,6 +104,7 @@ Component.register('sales-channel-snippet-list', {
 
             this.isLoading = true;
             this.processSuccess = false;
+            this.loadError = false;
 
             try {
                 await Promise.all(this.deletedSnippetIds.map((id) => this.repository.delete(id, Context.api)));
@@ -109,6 +124,10 @@ Component.register('sales-channel-snippet-list', {
                 this.deletedSnippetIds = [];
                 this.processSuccess = true;
                 await this.loadSnippets();
+            } catch (error) {
+                this.createNotificationError({
+                    message: this.$tc('sales-channel-snippets.notifications.saveError'),
+                });
             } finally {
                 this.isLoading = false;
             }

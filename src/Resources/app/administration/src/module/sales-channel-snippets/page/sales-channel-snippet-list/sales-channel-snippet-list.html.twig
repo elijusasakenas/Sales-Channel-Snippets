@@ -41,12 +41,25 @@
             </sw-card>
 
             <sw-card :title="$tc('sales-channel-snippets.cards.snippets')">
-                <sw-empty-state
+                <div
                     v-if="!canEdit"
-                    :title="$tc('sales-channel-snippets.empty.selectTitle')"
-                    :subline="$tc('sales-channel-snippets.empty.selectSubline')" />
+                    class="sales-channel-snippet-list__notice">
+                    <strong>{{ $tc('sales-channel-snippets.empty.selectTitle') }}</strong>
+                    <span>{{ $tc('sales-channel-snippets.empty.selectSubline') }}</span>
+                </div>
 
-                <sw-loader v-else-if="isLoading" />
+                <div
+                    v-else-if="isLoading"
+                    class="sales-channel-snippet-list__loader">
+                    <sw-loader />
+                </div>
+
+                <div
+                    v-else-if="loadError"
+                    class="sales-channel-snippet-list__notice sales-channel-snippet-list__notice--error">
+                    <strong>{{ $tc('sales-channel-snippets.empty.loadErrorTitle') }}</strong>
+                    <span>{{ $tc('sales-channel-snippets.empty.loadErrorSubline') }}</span>
+                </div>
 
                 <div
                     v-else
@@ -73,10 +86,12 @@
                         </sw-button>
                     </div>
 
-                    <sw-empty-state
+                    <div
                         v-if="snippets.length === 0"
-                        :title="$tc('sales-channel-snippets.empty.noSnippetsTitle')"
-                        :subline="$tc('sales-channel-snippets.empty.noSnippetsSubline')" />
+                        class="sales-channel-snippet-list__notice">
+                        <strong>{{ $tc('sales-channel-snippets.empty.noSnippetsTitle') }}</strong>
+                        <span>{{ $tc('sales-channel-snippets.empty.noSnippetsSubline') }}</span>
+                    </div>
                 </div>
             </sw-card>
         </sw-card-view>

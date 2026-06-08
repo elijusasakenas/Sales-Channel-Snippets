@@ -17,7 +17,9 @@
       "selectTitle": "Sales Channel und Sprache auswählen",
       "selectSubline": "Overrides werden für genau einen Sales Channel und eine Sprache gespeichert.",
       "noSnippetsTitle": "Keine Snippet-Overrides",
-      "noSnippetsSubline": "Füge den ersten Schlüssel und Wert für diese Zuordnung hinzu."
+      "noSnippetsSubline": "Klicke auf Snippet hinzufügen, um den ersten Schlüssel und Wert für diese Zuordnung anzulegen.",
+      "loadErrorTitle": "Snippet-Overrides konnten nicht geladen werden",
+      "loadErrorSubline": "Bitte Administration neu bauen, Cache leeren und erneut versuchen."
     },
     "fields": {
       "key": "Snippet-Schlüssel",
@@ -27,6 +29,10 @@
     },
     "placeholders": {
       "key": "checkout.confirmSubmit"
+    },
+    "notifications": {
+      "loadError": "Sales-Channel-Snippet-Overrides konnten nicht geladen werden.",
+      "saveError": "Sales-Channel-Snippet-Overrides konnten nicht gespeichert werden."
     }
   }
 }
