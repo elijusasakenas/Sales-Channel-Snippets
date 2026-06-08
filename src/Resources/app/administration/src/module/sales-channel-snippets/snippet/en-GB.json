@@ -1,0 +1,32 @@
+{
+  "sales-channel-snippets": {
+    "general": {
+      "mainMenuItemGeneral": "Sales Channel Snippets",
+      "descriptionTextModule": "Manage snippet overrides per sales channel and language."
+    },
+    "actions": {
+      "add": "Add snippet",
+      "remove": "Remove",
+      "save": "Save"
+    },
+    "cards": {
+      "assignment": "Assignment",
+      "snippets": "Snippet overrides"
+    },
+    "empty": {
+      "selectTitle": "Select a sales channel and language",
+      "selectSubline": "Overrides are stored for exactly one sales channel and language.",
+      "noSnippetsTitle": "No snippet overrides",
+      "noSnippetsSubline": "Add the first key and value for this assignment."
+    },
+    "fields": {
+      "key": "Snippet key",
+      "language": "Language",
+      "salesChannel": "Sales channel",
+      "value": "Custom value"
+    },
+    "placeholders": {
+      "key": "checkout.confirmSubmit"
+    }
+  }
+}

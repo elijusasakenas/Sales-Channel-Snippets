@@ -1,0 +1,21 @@
+.sales-channel-snippet-list {
+    &__filters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+        gap: 24px;
+    }
+
+    &__rows {
+        display: grid;
+        gap: 24px;
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: minmax(240px, 1fr) minmax(320px, 2fr) auto;
+        gap: 16px;
+        align-items: end;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #d1d9e0;
+    }
+}

@@ -1,0 +1,84 @@
+<sw-page class="sales-channel-snippet-list">
+    <template #smart-bar-header>
+        <h2>{{ $tc('sales-channel-snippets.general.mainMenuItemGeneral') }}</h2>
+    </template>
+
+    <template #smart-bar-actions>
+        <sw-button
+            :disabled="!canEdit"
+            @click="addSnippet">
+            {{ $tc('sales-channel-snippets.actions.add') }}
+        </sw-button>
+
+        <sw-button-process
+            :isLoading="isLoading"
+            :processSuccess="processSuccess"
+            :disabled="!canEdit"
+            @process-finish="saveFinish"
+            @click="onSave">
+            {{ $tc('sales-channel-snippets.actions.save') }}
+        </sw-button-process>
+    </template>
+
+    <template #content>
+        <sw-card-view>
+            <sw-card :title="$tc('sales-channel-snippets.cards.assignment')">
+                <div class="sales-channel-snippet-list__filters">
+                    <sw-entity-single-select
+                        v-model:value="filters.salesChannelId"
+                        entity="sales_channel"
+                        required
+                        :label="$tc('sales-channel-snippets.fields.salesChannel')"
+                        @update:value="onFilterChange" />
+
+                    <sw-entity-single-select
+                        v-model:value="filters.languageId"
+                        entity="language"
+                        required
+                        :label="$tc('sales-channel-snippets.fields.language')"
+                        @update:value="onFilterChange" />
+                </div>
+            </sw-card>
+
+            <sw-card :title="$tc('sales-channel-snippets.cards.snippets')">
+                <sw-empty-state
+                    v-if="!canEdit"
+                    :title="$tc('sales-channel-snippets.empty.selectTitle')"
+                    :subline="$tc('sales-channel-snippets.empty.selectSubline')" />
+
+                <sw-loader v-else-if="isLoading" />
+
+                <div
+                    v-else
+                    class="sales-channel-snippet-list__rows">
+                    <div
+                        v-for="snippet in snippets"
+                        :key="snippet.id || snippet._uniqueIdentifier"
+                        class="sales-channel-snippet-list__row">
+                        <sw-text-field
+                            v-model:value="snippet.translationKey"
+                            required
+                            :label="$tc('sales-channel-snippets.fields.key')"
+                            :placeholder="$tc('sales-channel-snippets.placeholders.key')" />
+
+                        <sw-textarea-field
+                            v-model:value="snippet.value"
+                            required
+                            :label="$tc('sales-channel-snippets.fields.value')" />
+
+                        <sw-button
+                            variant="danger"
+                            @click="removeSnippet(snippet)">
+                            {{ $tc('sales-channel-snippets.actions.remove') }}
+                        </sw-button>
+                    </div>
+
+                    <sw-empty-state
+                        v-if="snippets.length === 0"
+                        :title="$tc('sales-channel-snippets.empty.noSnippetsTitle')"
+                        :subline="$tc('sales-channel-snippets.empty.noSnippetsSubline')" />
+                </div>
+            </sw-card>
+        </sw-card-view>
+    </template>
+</sw-page>

@@ -1,0 +1,23 @@
+{
+  "name": "custom/sales-channel-snippets",
+  "description": "Admin-managed sales-channel-specific snippet overrides for Shopware 6.",
+  "type": "shopware-platform-plugin",
+  "license": "proprietary",
+  "autoload": {
+    "psr-4": {
+      "SalesChannelSnippets\\": "src/"
+    }
+  },
+  "extra": {
+    "shopware-plugin-class": "SalesChannelSnippets\\SalesChannelSnippets",
+    "label": {
+      "en-GB": "Sales Channel Snippets",
+      "de-DE": "Sales-Channel-Snippets"
+    }
+  },
+  "require": {
+    "shopware/core": "^6.6 || ^6.7",
+    "shopware/storefront": "^6.6 || ^6.7",
+    "shopware/administration": "^6.6 || ^6.7"
+  }
+}
