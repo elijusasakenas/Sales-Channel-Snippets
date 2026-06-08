@@ -34,3 +34,11 @@ The module appears under Settings > Extensions > Sales Channel Snippets.
 ## Notes
 
 This plugin intentionally keeps the default snippet system as the fallback source. Only keys saved in the custom module are overridden for the active storefront sales channel and language.
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution guidelines.
+
+## License
+
+This plugin is released under the MIT License. See [LICENSE](LICENSE).
